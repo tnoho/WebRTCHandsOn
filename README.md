@@ -1,6 +1,6 @@
 # SwiftでWebRTC実装ハンズオン
 
-この資料は2017/06/18に開催される[集まれSwift好き！Swift愛好会 vol20 ~SwiftでWebRTC実装ハンズオン~](https://love-swift.connpass.com/event/55249/)の教材です。
+この資料は2017/06/18に開催される[集まれSwift好き！Swift愛好会 vol20 \~SwiftでWebRTC実装ハンズオン\~](https://love-swift.connpass.com/event/55249/)の教材です。
 
 # 解説
 
