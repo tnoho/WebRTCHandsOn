@@ -19,7 +19,10 @@ class ViewController: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
-
+    
+    @IBAction func connectButtonAction(_ sender: Any) {
+        self.performSegue(withIdentifier: "connectToRoom", sender: nil)
+    }
+    
 }
 
