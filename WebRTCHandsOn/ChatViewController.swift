@@ -39,9 +39,6 @@ class ChatViewController: UIViewController, WebSocketDelegate, RTCPeerConnection
         if peerConnection != nil {
             hangUp()
         }
-        if websocket.isConnected {
-            websocket.disconnect()
-        }
         audioSource = nil
         videoSource = nil
         peerConnectionFactory = nil
