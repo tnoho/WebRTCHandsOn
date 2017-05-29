@@ -83,10 +83,10 @@ class ChatViewController: UIViewController, WebSocketDelegate,
   
     @IBAction func connectButtonAction(_ sender: Any) {
         connectButton.isHidden = true
-        createOffer()
+        makeOffer()
     }
     
-    func createOffer() {
+    func makeOffer() {
         let constraints = RTCMediaConstraints(mandatoryConstraints: [
             "OfferToReceiveAudio": "true",
             "OfferToReceiveVideo": "true"
@@ -100,7 +100,7 @@ class ChatViewController: UIViewController, WebSocketDelegate,
         self.peerConnection.offer(for: constraints, completionHandler: offerCompletion)
     }
     
-    func createAnswer() {
+    func makeAnswer() {
         let constraints = RTCMediaConstraints(mandatoryConstraints: nil, optionalConstraints: nil)
         let answerCompletion = { (answer: RTCSessionDescription?, error: Error?) in
             let setLocalDescCompletion = {(error: Error?) in
@@ -133,27 +133,29 @@ class ChatViewController: UIViewController, WebSocketDelegate,
         let jsonMessage = JSON.parse(text)
         let type = jsonMessage["type"].stringValue
         switch (type) {
-            case "offer":
-                connectButton.isHidden = true
-                let offer = RTCSessionDescription(
-                    type: RTCSessionDescription.type(for: jsonMessage["type"].stringValue),
-                    sdp: jsonMessage["sdp"].stringValue)
-                self.peerConnection.setRemoteDescription(offer, completionHandler: {(error: Error?) in
-                    self.createAnswer()
-                })
-            case "answer":
-                let answer = RTCSessionDescription(
-                    type: RTCSessionDescription.type(for: jsonMessage["type"].stringValue),
-                    sdp: jsonMessage["sdp"].stringValue)
-                self.peerConnection.setRemoteDescription(answer, completionHandler: {(error: Error?) in })
-            case "candidate":
-                let candidate = RTCIceCandidate(
-                    sdp: jsonMessage["ice"]["candidate"].stringValue,
-                    sdpMLineIndex: jsonMessage["ice"]["sdpMLineIndex"].int32Value,
-                    sdpMid: jsonMessage["ice"]["sdpMid"].stringValue)
-                self.peerConnection.add(candidate)
-            default:
-                return
+        case "offer":
+            connectButton.isHidden = true
+            let offer = RTCSessionDescription(
+                type: RTCSessionDescription.type(for: jsonMessage["type"].stringValue),
+                sdp: jsonMessage["sdp"].stringValue)
+            self.peerConnection.setRemoteDescription(offer, completionHandler: {(error: Error?) in
+                self.makeAnswer()
+            })
+        case "answer":
+            let answer = RTCSessionDescription(
+                type: RTCSessionDescription.type(for: jsonMessage["type"].stringValue),
+                sdp: jsonMessage["sdp"].stringValue)
+            self.peerConnection.setRemoteDescription(answer, completionHandler: {(error: Error?) in })
+        case "candidate":
+            let candidate = RTCIceCandidate(
+                sdp: jsonMessage["ice"]["candidate"].stringValue,
+                sdpMLineIndex: jsonMessage["ice"]["sdpMLineIndex"].int32Value,
+                sdpMid: jsonMessage["ice"]["sdpMid"].stringValue)
+            self.peerConnection.add(candidate)
+        case "close":
+            hangUp()
+        default:
+            return
         }
     }
     
@@ -186,6 +188,26 @@ class ChatViewController: UIViewController, WebSocketDelegate,
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceConnectionState) {
         // PeerConnectionの接続状況が変化した際に呼ばれます
+        var state = ""
+        switch (newState) {
+        case RTCIceConnectionState.checking:
+            state = "checking"
+        case RTCIceConnectionState.completed:
+            state = "completed"
+        case RTCIceConnectionState.connected:
+            state = "connected"
+        case RTCIceConnectionState.closed:
+            state = "closed"
+            hangUp()
+        case RTCIceConnectionState.failed:
+            state = "failed"
+            hangUp()
+        case RTCIceConnectionState.disconnected:
+            state = "disconnected"
+        default:
+            break
+        }
+        LOG("ICE connection Status has changed to \(state)")
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceGatheringState) {
@@ -224,18 +246,27 @@ class ChatViewController: UIViewController, WebSocketDelegate,
     }
     
     func hangUp() {
-        if remoteVideoTrack != nil {
-            remoteVideoTrack?.remove(remoteVideoView)
+        if peerConnection != nil {
+            if peerConnection.iceConnectionState != RTCIceConnectionState.closed {
+                peerConnection.close()
+                let jsonClose: JSON = [
+                    "type": "close"
+                ]
+                websocket.write(string: jsonClose.rawString()!)
+            }
+            if remoteVideoTrack != nil {
+                remoteVideoTrack?.remove(remoteVideoView)
+            }
+            localVideoTrack = nil
+            remoteVideoTrack = nil
+            peerConnection = nil
         }
-        localVideoTrack = nil
-        remoteVideoTrack = nil
-        peerConnection = nil
     }
     
     @IBAction func closeButtonAction(_ sender: Any) {
         // 切断ボタンを押した時
-        websocket.disconnect()
         hangUp()
+        websocket.disconnect()
         _ = self.navigationController?.popToRootViewController(animated: true)
     }
     
