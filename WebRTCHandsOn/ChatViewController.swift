@@ -13,7 +13,7 @@ import Starscream
 class ChatViewController: UIViewController, WebSocketDelegate {
     var websocket: WebSocket! = nil
 
-    @IBOutlet weak var localVideoView: RTCEAGLVideoView!
+    @IBOutlet weak var cameraPreview: RTCCameraPreviewView!
     @IBOutlet weak var remoteVideoView: RTCEAGLVideoView!
     @IBOutlet weak var connectButton: UIButton!
     
