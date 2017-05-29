@@ -213,7 +213,6 @@ class ChatViewController: UIViewController, WebSocketDelegate,
         // Candidateが削除された際に呼ばれます
     }
     
-    
     func videoView(_ videoView: RTCEAGLVideoView, didChangeVideoSize size: CGSize) {
         let width = self.view.frame.width
         let height = self.view.frame.width * size.height / size.width
@@ -224,20 +223,19 @@ class ChatViewController: UIViewController, WebSocketDelegate,
             height: height)
     }
     
-    func releaseAll() {
+    func hangUp() {
         if remoteVideoTrack != nil {
             remoteVideoTrack?.remove(remoteVideoView)
         }
         localVideoTrack = nil
         remoteVideoTrack = nil
         peerConnection = nil
-        peerConnectionFactory = nil
     }
     
     @IBAction func closeButtonAction(_ sender: Any) {
         // 切断ボタンを押した時
         websocket.disconnect()
-        releaseAll()
+        hangUp()
         _ = self.navigationController?.popToRootViewController(animated: true)
     }
     
