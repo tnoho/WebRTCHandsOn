@@ -11,7 +11,7 @@ import WebRTC
 
 class ChatViewController: UIViewController {
 
-    @IBOutlet weak var localVideoView: RTCEAGLVideoView!
+    @IBOutlet weak var cameraPreview: RTCCameraPreviewView!
     @IBOutlet weak var remoteVideoView: RTCEAGLVideoView!
     @IBOutlet weak var connectButton: UIButton!
     
