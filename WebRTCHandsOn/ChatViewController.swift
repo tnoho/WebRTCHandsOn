@@ -21,7 +21,6 @@ class ChatViewController: UIViewController, WebSocketDelegate, RTCPeerConnection
 
     @IBOutlet weak var cameraPreview: RTCCameraPreviewView!
     @IBOutlet weak var remoteVideoView: RTCEAGLVideoView!
-    @IBOutlet weak var connectButton: UIButton!
     
     
     override func viewDidLoad() {
@@ -98,11 +97,13 @@ class ChatViewController: UIViewController, WebSocketDelegate, RTCPeerConnection
     }
   
     @IBAction func connectButtonAction(_ sender: Any) {
+        if peerConnection == nil {
+            createPeerConnection()
+        }
     }
 
     func websocketDidConnect(socket: WebSocket) {
         LOG("websocketが接続されました")
-        createPeerConnection()
     }
     
     func websocketDidDisconnect(socket: WebSocket, error: NSError?) {
@@ -153,6 +154,10 @@ class ChatViewController: UIViewController, WebSocketDelegate, RTCPeerConnection
         // Candidateが削除された際に呼ばれます
     }
     
+    @IBAction func hangupButtonAction(_ sender: Any) {
+        hangUp()
+    }
+    
     func hangUp() {
         localVideoTrack = nil
         peerConnection = nil
@@ -160,7 +165,9 @@ class ChatViewController: UIViewController, WebSocketDelegate, RTCPeerConnection
     
     @IBAction func closeButtonAction(_ sender: Any) {
         // 切断ボタンを押した時
-        hangUp()
+        if peerConnection != nil {
+            hangUp()
+        }
         websocket.disconnect()
         _ = self.navigationController?.popToRootViewController(animated: true)
     }
