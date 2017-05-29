@@ -132,16 +132,15 @@ class ChatViewController: UIViewController, WebSocketDelegate, RTCPeerConnection
         // Candidateが削除された際に呼ばれます
     }
     
-    func releaseAll() {
+    func hangUp() {
         localVideoTrack = nil
         peerConnection = nil
-        peerConnectionFactory = nil
     }
     
     @IBAction func closeButtonAction(_ sender: Any) {
         // 切断ボタンを押した時
         websocket.disconnect()
-        releaseAll()
+        hangUp()
         _ = self.navigationController?.popToRootViewController(animated: true)
     }
     
