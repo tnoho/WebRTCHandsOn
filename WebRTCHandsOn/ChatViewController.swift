@@ -17,7 +17,7 @@ class ChatViewController: UIViewController, WebSocketDelegate, RTCPeerConnection
     var peerConnection: RTCPeerConnection! = nil
     var localVideoTrack: RTCVideoTrack?
 
-    @IBOutlet weak var localVideoView: RTCEAGLVideoView!
+    @IBOutlet weak var cameraPreview: RTCCameraPreviewView!
     @IBOutlet weak var remoteVideoView: RTCEAGLVideoView!
     @IBOutlet weak var connectButton: UIButton!
     
@@ -61,14 +61,14 @@ class ChatViewController: UIViewController, WebSocketDelegate, RTCPeerConnection
         let videoSourceConstraints = RTCMediaConstraints(
             mandatoryConstraints: nil, optionalConstraints: nil)
         let videoSource = peerConnectionFactory.avFoundationVideoSource(with: videoSourceConstraints)
+        // 映像ソースをプレビューに設定
+        cameraPreview.captureSession = videoSource.captureSession
         // 映像トラックの作成
         localVideoTrack = peerConnectionFactory.videoTrack(with: videoSource, trackId: "ARDAMSv0")
         // PeerConnectionからVideoのSenderを作成
         let videoSender = peerConnection.sender(withKind: kRTCMediaStreamTrackKindVideo, streamId: "ARDAMS")
         // Senderにトラックを設定
         videoSender.track = localVideoTrack
-        // トラックに自画像表示枠を追加
-        localVideoTrack?.add(localVideoView)
     }
 
     override func didReceiveMemoryWarning() {
