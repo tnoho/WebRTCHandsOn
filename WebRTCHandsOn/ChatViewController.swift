@@ -11,7 +11,8 @@ import WebRTC
 import Starscream
 import SwiftyJSON
 
-class ChatViewController: UIViewController, WebSocketDelegate, RTCPeerConnectionDelegate {
+class ChatViewController: UIViewController, WebSocketDelegate,
+                            RTCPeerConnectionDelegate, RTCEAGLVideoViewDelegate {
     var websocket: WebSocket! = nil
     
     var peerConnectionFactory: RTCPeerConnectionFactory! = nil
@@ -26,6 +27,8 @@ class ChatViewController: UIViewController, WebSocketDelegate, RTCPeerConnection
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        remoteVideoView.delegate = self
         // RTCPeerConnectionFactoryの初期化
         peerConnectionFactory = RTCPeerConnectionFactory()
         
@@ -208,6 +211,17 @@ class ChatViewController: UIViewController, WebSocketDelegate, RTCPeerConnection
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didRemove candidates: [RTCIceCandidate]) {
         // Candidateが削除された際に呼ばれます
+    }
+    
+    
+    func videoView(_ videoView: RTCEAGLVideoView, didChangeVideoSize size: CGSize) {
+        let width = self.view.frame.width
+        let height = self.view.frame.width * size.height / size.width
+        remoteVideoView.frame = CGRect(
+            x: 0,
+            y: (self.view.frame.height - height) / 2,
+            width: width,
+            height: height)
     }
     
     func releaseAll() {
