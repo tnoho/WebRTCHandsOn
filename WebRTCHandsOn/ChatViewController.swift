@@ -16,6 +16,8 @@ class ChatViewController: UIViewController, WebSocketDelegate, RTCPeerConnection
     var peerConnectionFactory: RTCPeerConnectionFactory! = nil
     var peerConnection: RTCPeerConnection! = nil
     var localVideoTrack: RTCVideoTrack?
+    var audioSource: RTCAudioSource?
+    var videoSource: RTCAVFoundationVideoSource?
 
     @IBOutlet weak var cameraPreview: RTCCameraPreviewView!
     @IBOutlet weak var remoteVideoView: RTCEAGLVideoView!
@@ -27,9 +29,38 @@ class ChatViewController: UIViewController, WebSocketDelegate, RTCPeerConnection
         // RTCPeerConnectionFactoryの初期化
         peerConnectionFactory = RTCPeerConnectionFactory()
         
+        startVideo()
+        
         websocket = WebSocket(url: URL(string: "wss://conf.space/WebRTCHandsOnSig/tnoho")!)
         websocket.delegate = self
         websocket.connect()
+    }
+    
+    deinit {
+        if peerConnection != nil {
+            hangUp()
+        }
+        if websocket.isConnected {
+            websocket.disconnect()
+        }
+        audioSource = nil
+        videoSource = nil
+        peerConnectionFactory = nil
+    }
+    
+    func startVideo() {
+        // 音声ソースの設定
+        let audioSourceConstraints = RTCMediaConstraints(
+            mandatoryConstraints: nil, optionalConstraints: nil)
+        // 音声ソースの生成
+        audioSource = peerConnectionFactory.audioSource(with: audioSourceConstraints)
+        
+        // 映像ソースの設定
+        let videoSourceConstraints = RTCMediaConstraints(
+            mandatoryConstraints: nil, optionalConstraints: nil)
+        videoSource = peerConnectionFactory.avFoundationVideoSource(with: videoSourceConstraints)
+        // 映像ソースをプレビューに設定
+        cameraPreview.captureSession = videoSource?.captureSession
     }
     
     func createPeerConnection() {
@@ -45,26 +76,16 @@ class ChatViewController: UIViewController, WebSocketDelegate, RTCPeerConnection
         peerConnection = peerConnectionFactory.peerConnection(
             with: configuration, constraints: peerConnectionConstraints, delegate: self)
         
-        // 音声ソースの設定
-        let audioSourceConstraints = RTCMediaConstraints(
-            mandatoryConstraints: nil, optionalConstraints: nil)
-        // 音声ソースの生成
-        let audioSource = peerConnectionFactory.audioSource(with: audioSourceConstraints)
         // 音声トラックの作成
-        let localAudioTrack = peerConnectionFactory.audioTrack(with: audioSource, trackId: "ARDAMSa0")
+        let localAudioTrack = peerConnectionFactory.audioTrack(with: audioSource!, trackId: "ARDAMSa0")
         // PeerConnectionからSenderを作成
         let audioSender = peerConnection.sender(withKind: kRTCMediaStreamTrackKindAudio, streamId: "ARDAMS")
         // Senderにトラックを設定
         audioSender.track = localAudioTrack
         
-        // 映像ソースの設定
-        let videoSourceConstraints = RTCMediaConstraints(
-            mandatoryConstraints: nil, optionalConstraints: nil)
-        let videoSource = peerConnectionFactory.avFoundationVideoSource(with: videoSourceConstraints)
-        // 映像ソースをプレビューに設定
-        cameraPreview.captureSession = videoSource.captureSession
+        
         // 映像トラックの作成
-        localVideoTrack = peerConnectionFactory.videoTrack(with: videoSource, trackId: "ARDAMSv0")
+        localVideoTrack = peerConnectionFactory.videoTrack(with: videoSource!, trackId: "ARDAMSv0")
         // PeerConnectionからVideoのSenderを作成
         let videoSender = peerConnection.sender(withKind: kRTCMediaStreamTrackKindVideo, streamId: "ARDAMS")
         // Senderにトラックを設定
@@ -139,8 +160,8 @@ class ChatViewController: UIViewController, WebSocketDelegate, RTCPeerConnection
     
     @IBAction func closeButtonAction(_ sender: Any) {
         // 切断ボタンを押した時
-        websocket.disconnect()
         hangUp()
+        websocket.disconnect()
         _ = self.navigationController?.popToRootViewController(animated: true)
     }
     
