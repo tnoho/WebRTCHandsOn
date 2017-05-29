@@ -15,6 +15,7 @@ class ChatViewController: UIViewController, WebSocketDelegate {
 
     @IBOutlet weak var localVideoView: RTCEAGLVideoView!
     @IBOutlet weak var remoteVideoView: RTCEAGLVideoView!
+    @IBOutlet weak var connectButton: UIButton!
     
     
     override func viewDidLoad() {
@@ -28,6 +29,9 @@ class ChatViewController: UIViewController, WebSocketDelegate {
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+  
+    @IBAction func connectButtonAction(_ sender: Any) {
     }
 
     func websocketDidConnect(socket: WebSocket) {
@@ -46,7 +50,7 @@ class ChatViewController: UIViewController, WebSocketDelegate {
         LOG("Dataを受信しました : \(data.count)")
     }
     
-    @IBAction func disconnectButtonAction(_ sender: Any) {
+    @IBAction func closeButtonAction(_ sender: Any) {
         // 切断ボタンを押した時
         websocket.disconnect()
         _ = self.navigationController?.popToRootViewController(animated: true)

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12120" systemVersion="16F73" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="7as-Fx-hZS">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12120" systemVersion="16E195" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="7as-Fx-hZS">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -26,7 +26,7 @@
                                 <constraints>
                                     <constraint firstAttribute="width" constant="100" id="9e4-Hy-u0D"/>
                                 </constraints>
-                                <state key="normal" title="Connect"/>
+                                <state key="normal" title="Join"/>
                                 <connections>
                                     <action selector="connectButtonAction:" destination="BYZ-38-t0r" eventType="touchUpInside" id="itU-8o-C2m"/>
                                 </connections>
@@ -40,7 +40,7 @@
                     </view>
                     <navigationItem key="navigationItem" id="agB-dg-FQF"/>
                     <connections>
-                        <segue destination="Erv-cr-jKP" kind="show" identifier="connectToRoom" id="ea5-UN-baq"/>
+                        <segue destination="Erv-cr-jKP" kind="show" identifier="joinToRoom" id="ea5-UN-baq"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -50,7 +50,6 @@
         <!--Chat View Controller-->
         <scene sceneID="Hau-FH-LSf">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="MXO-ID-p6e" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <viewController id="Erv-cr-jKP" userLabel="Chat View Controller" customClass="ChatViewController" customModule="WebRTCHandsOn" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="7b2-oR-LNo"/>
@@ -73,16 +72,29 @@
                                 </constraints>
                             </view>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="84r-yb-B9O">
-                                <rect key="frame" x="137" y="617" width="100" height="30"/>
-                                <color key="backgroundColor" red="0.0" green="0.0" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <rect key="frame" x="255" y="617" width="100" height="30"/>
+                                <color key="backgroundColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="Cl0-9F-wBX"/>
                                 </constraints>
-                                <state key="normal" title="Disconnect">
+                                <state key="normal" title="Close">
                                     <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
-                                    <action selector="disconnectButtonAction:" destination="Erv-cr-jKP" eventType="touchUpInside" id="1U6-8o-zhE"/>
+                                    <action selector="closeButtonAction:" destination="Erv-cr-jKP" eventType="touchUpInside" id="Phu-3R-hkT"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="iOO-w5-mzR">
+                                <rect key="frame" x="20" y="617" width="100" height="30"/>
+                                <color key="backgroundColor" red="0.0" green="0.0" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="xcr-tL-HpG"/>
+                                </constraints>
+                                <state key="normal" title="Connect">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="connectButtonAction:" destination="Erv-cr-jKP" eventType="touchUpInside" id="Wik-Sa-gZB"/>
                                 </connections>
                             </button>
                         </subviews>
@@ -91,18 +103,22 @@
                             <constraint firstAttribute="trailing" secondItem="23X-fE-Gi3" secondAttribute="trailing" id="1gW-Mg-Lz5"/>
                             <constraint firstAttribute="trailing" secondItem="JCC-tZ-YXh" secondAttribute="trailing" constant="20" id="86m-h3-71l"/>
                             <constraint firstItem="23X-fE-Gi3" firstAttribute="top" secondItem="7b2-oR-LNo" secondAttribute="bottom" id="A4W-6V-pmj"/>
+                            <constraint firstAttribute="trailing" secondItem="84r-yb-B9O" secondAttribute="trailing" constant="20" id="Pg3-Ez-h6D"/>
                             <constraint firstItem="23X-fE-Gi3" firstAttribute="leading" secondItem="U1b-sh-a1O" secondAttribute="leading" id="aYA-Q8-eSm"/>
+                            <constraint firstItem="xxE-si-1Pd" firstAttribute="top" secondItem="iOO-w5-mzR" secondAttribute="bottom" constant="20" id="ebW-jA-o6h"/>
                             <constraint firstItem="JCC-tZ-YXh" firstAttribute="top" secondItem="7b2-oR-LNo" secondAttribute="bottom" constant="20" id="fAH-iM-Nqn"/>
                             <constraint firstItem="xxE-si-1Pd" firstAttribute="top" secondItem="23X-fE-Gi3" secondAttribute="bottom" id="ids-gU-eui"/>
                             <constraint firstItem="xxE-si-1Pd" firstAttribute="top" secondItem="84r-yb-B9O" secondAttribute="bottom" constant="20" id="klB-8N-O0G"/>
-                            <constraint firstItem="84r-yb-B9O" firstAttribute="centerX" secondItem="U1b-sh-a1O" secondAttribute="centerX" id="s7C-Nz-LoL"/>
+                            <constraint firstItem="iOO-w5-mzR" firstAttribute="leading" secondItem="U1b-sh-a1O" secondAttribute="leading" constant="20" id="tzc-st-LeK"/>
                         </constraints>
                     </view>
                     <connections>
+                        <outlet property="connectButton" destination="iOO-w5-mzR" id="ZAW-CW-dBN"/>
                         <outlet property="localVideoView" destination="JCC-tZ-YXh" id="dJF-ZQ-C2H"/>
                         <outlet property="remoteVideoView" destination="23X-fE-Gi3" id="M2G-Hl-lRQ"/>
                     </connections>
                 </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="MXO-ID-p6e" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="993" y="139"/>
         </scene>
