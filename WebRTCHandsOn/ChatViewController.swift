@@ -15,7 +15,6 @@ class ChatViewController: UIViewController, WebSocketDelegate, RTCPeerConnection
     
     var peerConnectionFactory: RTCPeerConnectionFactory! = nil
     var peerConnection: RTCPeerConnection! = nil
-    var localVideoTrack: RTCVideoTrack?
     var audioSource: RTCAudioSource?
     var videoSource: RTCAVFoundationVideoSource?
 
@@ -81,7 +80,7 @@ class ChatViewController: UIViewController, WebSocketDelegate, RTCPeerConnection
         
         
         // 映像トラックの作成
-        localVideoTrack = peerConnectionFactory.videoTrack(with: videoSource!, trackId: "ARDAMSv0")
+        let localVideoTrack = peerConnectionFactory.videoTrack(with: videoSource!, trackId: "ARDAMSv0")
         // PeerConnectionからVideoのSenderを作成
         let videoSender = peerConnection.sender(withKind: kRTCMediaStreamTrackKindVideo, streamId: "ARDAMS")
         // Senderにトラックを設定
@@ -156,7 +155,6 @@ class ChatViewController: UIViewController, WebSocketDelegate, RTCPeerConnection
     }
     
     func hangUp() {
-        localVideoTrack = nil
         peerConnection = nil
     }
     
