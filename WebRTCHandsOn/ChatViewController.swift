@@ -15,7 +15,6 @@ class ChatViewController: UIViewController, WebSocketDelegate {
 
     @IBOutlet weak var cameraPreview: RTCCameraPreviewView!
     @IBOutlet weak var remoteVideoView: RTCEAGLVideoView!
-    @IBOutlet weak var connectButton: UIButton!
     
     
     override func viewDidLoad() {
@@ -48,6 +47,9 @@ class ChatViewController: UIViewController, WebSocketDelegate {
     
     func websocketDidReceiveData(socket: WebSocket, data: Data) {
         LOG("Dataを受信しました : \(data.count)")
+    }
+
+    @IBAction func hangupButtonAction(_ sender: Any) {
     }
     
     @IBAction func closeButtonAction(_ sender: Any) {
