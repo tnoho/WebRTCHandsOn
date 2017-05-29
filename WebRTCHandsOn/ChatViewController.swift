@@ -63,7 +63,7 @@ class ChatViewController: UIViewController, WebSocketDelegate,
         cameraPreview.captureSession = videoSource?.captureSession
     }
     
-    func createPeerConnection() {
+    func prepareNewConnection() -> RTCPeerConnection {
         // STUN/TURNサーバーの指定
         let configuration = RTCConfiguration()
         configuration.iceServers = [
@@ -73,7 +73,7 @@ class ChatViewController: UIViewController, WebSocketDelegate,
         let peerConnectionConstraints = RTCMediaConstraints(
             mandatoryConstraints: nil, optionalConstraints: nil)
         // PeerConnectionの初期化
-        peerConnection = peerConnectionFactory.peerConnection(
+        let peerConnection = peerConnectionFactory.peerConnection(
             with: configuration, constraints: peerConnectionConstraints, delegate: self)
         
         // 音声トラックの作成
@@ -90,6 +90,8 @@ class ChatViewController: UIViewController, WebSocketDelegate,
         let videoSender = peerConnection.sender(withKind: kRTCMediaStreamTrackKindVideo, streamId: "ARDAMS")
         // Senderにトラックを設定
         videoSender.track = localVideoTrack
+        
+        return peerConnection
     }
 
     override func didReceiveMemoryWarning() {
@@ -107,7 +109,7 @@ class ChatViewController: UIViewController, WebSocketDelegate,
     }
     
     func makeOffer() {
-        createPeerConnection()
+        peerConnection = prepareNewConnection()
         let constraints = RTCMediaConstraints(mandatoryConstraints: [
             "OfferToReceiveAudio": "true",
             "OfferToReceiveVideo": "true"
@@ -156,7 +158,7 @@ class ChatViewController: UIViewController, WebSocketDelegate,
         if peerConnection != nil {
             LOG("peerConnection alreay exist!")
         }
-        createPeerConnection()
+        peerConnection = prepareNewConnection()
         self.peerConnection.setRemoteDescription(offer, completionHandler: {(error: Error?) in
             self.makeAnswer()
         })
