@@ -21,7 +21,7 @@ class ViewController: UIViewController {
     }
     
     @IBAction func connectButtonAction(_ sender: Any) {
-        self.performSegue(withIdentifier: "connectToRoom", sender: nil)
+        self.performSegue(withIdentifier: "joinToRoom", sender: nil)
     }
     
 }

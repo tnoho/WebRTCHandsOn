@@ -13,6 +13,7 @@ class ChatViewController: UIViewController {
 
     @IBOutlet weak var localVideoView: RTCEAGLVideoView!
     @IBOutlet weak var remoteVideoView: RTCEAGLVideoView!
+    @IBOutlet weak var connectButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,7 +25,9 @@ class ChatViewController: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    
+  
+    @IBAction func connectButtonAction(_ sender: Any) {
+    }
 
     /*
     // MARK: - Navigation
@@ -36,7 +39,8 @@ class ChatViewController: UIViewController {
     }
     */
     
-    @IBAction func disconnectButtonAction(_ sender: Any) {
+    
+    @IBAction func closeButtonAction(_ sender: Any) {
         _ = self.navigationController?.popToRootViewController(animated: true)
     }
 }
