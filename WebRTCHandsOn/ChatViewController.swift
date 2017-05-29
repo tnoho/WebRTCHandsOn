@@ -17,12 +17,12 @@ class ChatViewController: UIViewController, WebSocketDelegate,
     
     var peerConnectionFactory: RTCPeerConnectionFactory! = nil
     var peerConnection: RTCPeerConnection! = nil
-    var localVideoTrack: RTCVideoTrack?
     var remoteVideoTrack: RTCVideoTrack?
+    var audioSource: RTCAudioSource?
+    var videoSource: RTCAVFoundationVideoSource?
 
     @IBOutlet weak var cameraPreview: RTCCameraPreviewView!
     @IBOutlet weak var remoteVideoView: RTCEAGLVideoView!
-    @IBOutlet weak var connectButton: UIButton!
     
     
     override func viewDidLoad() {
@@ -32,9 +32,35 @@ class ChatViewController: UIViewController, WebSocketDelegate,
         // RTCPeerConnectionFactoryの初期化
         peerConnectionFactory = RTCPeerConnectionFactory()
         
+        startVideo()
+        
         websocket = WebSocket(url: URL(string: "wss://conf.space/WebRTCHandsOnSig/tnoho")!)
         websocket.delegate = self
         websocket.connect()
+    }
+    
+    deinit {
+        if peerConnection != nil {
+            hangUp()
+        }
+        audioSource = nil
+        videoSource = nil
+        peerConnectionFactory = nil
+    }
+    
+    func startVideo() {
+        // 音声ソースの設定
+        let audioSourceConstraints = RTCMediaConstraints(
+            mandatoryConstraints: nil, optionalConstraints: nil)
+        // 音声ソースの生成
+        audioSource = peerConnectionFactory.audioSource(with: audioSourceConstraints)
+        
+        // 映像ソースの設定
+        let videoSourceConstraints = RTCMediaConstraints(
+            mandatoryConstraints: nil, optionalConstraints: nil)
+        videoSource = peerConnectionFactory.avFoundationVideoSource(with: videoSourceConstraints)
+        // 映像ソースをプレビューに設定
+        cameraPreview.captureSession = videoSource?.captureSession
     }
     
     func createPeerConnection() {
@@ -50,26 +76,16 @@ class ChatViewController: UIViewController, WebSocketDelegate,
         peerConnection = peerConnectionFactory.peerConnection(
             with: configuration, constraints: peerConnectionConstraints, delegate: self)
         
-        // 音声ソースの設定
-        let audioSourceConstraints = RTCMediaConstraints(
-            mandatoryConstraints: nil, optionalConstraints: nil)
-        // 音声ソースの生成
-        let audioSource = peerConnectionFactory.audioSource(with: audioSourceConstraints)
         // 音声トラックの作成
-        let localAudioTrack = peerConnectionFactory.audioTrack(with: audioSource, trackId: "ARDAMSa0")
+        let localAudioTrack = peerConnectionFactory.audioTrack(with: audioSource!, trackId: "ARDAMSa0")
         // PeerConnectionからSenderを作成
         let audioSender = peerConnection.sender(withKind: kRTCMediaStreamTrackKindAudio, streamId: "ARDAMS")
         // Senderにトラックを設定
         audioSender.track = localAudioTrack
         
-        // 映像ソースの設定
-        let videoSourceConstraints = RTCMediaConstraints(
-            mandatoryConstraints: nil, optionalConstraints: nil)
-        let videoSource = peerConnectionFactory.avFoundationVideoSource(with: videoSourceConstraints)
-        // 映像ソースをプレビューに設定
-        cameraPreview.captureSession = videoSource.captureSession
+        
         // 映像トラックの作成
-        localVideoTrack = peerConnectionFactory.videoTrack(with: videoSource, trackId: "ARDAMSv0")
+        let localVideoTrack = peerConnectionFactory.videoTrack(with: videoSource!, trackId: "ARDAMSv0")
         // PeerConnectionからVideoのSenderを作成
         let videoSender = peerConnection.sender(withKind: kRTCMediaStreamTrackKindVideo, streamId: "ARDAMS")
         // Senderにトラックを設定
@@ -82,17 +98,24 @@ class ChatViewController: UIViewController, WebSocketDelegate,
     }
   
     @IBAction func connectButtonAction(_ sender: Any) {
-        connectButton.isHidden = true
-        makeOffer()
+        if peerConnection == nil {
+            LOG("make Offer")
+            makeOffer()
+        } else {
+            LOG("peer already exist.")
+        }
     }
     
     func makeOffer() {
+        createPeerConnection()
         let constraints = RTCMediaConstraints(mandatoryConstraints: [
             "OfferToReceiveAudio": "true",
             "OfferToReceiveVideo": "true"
             ], optionalConstraints: nil)
         let offerCompletion = { (offer: RTCSessionDescription?, error: Error?) in
+            self.LOG("createOffer() succsess")
             let setLocalDescCompletion = {(error: Error?) in
+                self.LOG("setLocalDescription() succsess")
                 self.sendSDP(offer!)
             }
             self.peerConnection.setLocalDescription(offer!, completionHandler: setLocalDescCompletion)
@@ -101,9 +124,16 @@ class ChatViewController: UIViewController, WebSocketDelegate,
     }
     
     func makeAnswer() {
+        LOG("sending Answer. Creating remote session description...")
+        if peerConnection == nil {
+            LOG("peerConnection NOT exist!")
+            return
+        }
         let constraints = RTCMediaConstraints(mandatoryConstraints: nil, optionalConstraints: nil)
         let answerCompletion = { (answer: RTCSessionDescription?, error: Error?) in
+            self.LOG("createAnswer() succsess")
             let setLocalDescCompletion = {(error: Error?) in
+                self.LOG("setLocalDescription() succsess")
                 self.sendSDP(answer!)
             }
             self.peerConnection.setLocalDescription(answer!, completionHandler: setLocalDescCompletion)
@@ -112,16 +142,36 @@ class ChatViewController: UIViewController, WebSocketDelegate,
     }
     
     func sendSDP(_ desc: RTCSessionDescription) {
+        LOG("---sending sdp ---")
         let jsonSdp: JSON = [
             "sdp": desc.sdp,
             "type": RTCSessionDescription.string(for: desc.type)
         ]
-        websocket.write(string: jsonSdp.rawString()!)
+        let message = jsonSdp.rawString()!
+        LOG("sending SDP=" + message)
+        websocket.write(string: message)
+    }
+    
+    func setOffer(_ offer: RTCSessionDescription) {
+        if peerConnection != nil {
+            LOG("peerConnection alreay exist!")
+        }
+        createPeerConnection()
+        self.peerConnection.setRemoteDescription(offer, completionHandler: {(error: Error?) in
+            self.makeAnswer()
+        })
+    }
+    
+    func setAnswer(_ answer: RTCSessionDescription) {
+        if peerConnection == nil {
+            LOG("peerConnection NOT exist!")
+            return
+        }
+        self.peerConnection.setRemoteDescription(answer, completionHandler: {(error: Error?) in })
     }
 
     func websocketDidConnect(socket: WebSocket) {
         LOG("websocketが接続されました")
-        createPeerConnection()
     }
     
     func websocketDidDisconnect(socket: WebSocket, error: NSError?) {
@@ -134,18 +184,15 @@ class ChatViewController: UIViewController, WebSocketDelegate,
         let type = jsonMessage["type"].stringValue
         switch (type) {
         case "offer":
-            connectButton.isHidden = true
             let offer = RTCSessionDescription(
                 type: RTCSessionDescription.type(for: jsonMessage["type"].stringValue),
                 sdp: jsonMessage["sdp"].stringValue)
-            self.peerConnection.setRemoteDescription(offer, completionHandler: {(error: Error?) in
-                self.makeAnswer()
-            })
+            setOffer(offer)
         case "answer":
             let answer = RTCSessionDescription(
                 type: RTCSessionDescription.type(for: jsonMessage["type"].stringValue),
                 sdp: jsonMessage["sdp"].stringValue)
-            self.peerConnection.setRemoteDescription(answer, completionHandler: {(error: Error?) in })
+            setAnswer(answer)
         case "candidate":
             let candidate = RTCIceCandidate(
                 sdp: jsonMessage["ice"]["candidate"].stringValue,
@@ -169,11 +216,11 @@ class ChatViewController: UIViewController, WebSocketDelegate,
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didAdd stream: RTCMediaStream) {
         // 映像/音声が追加された際に呼ばれます
+        LOG("-- peer.onaddstream()")
         DispatchQueue.main.async(execute: { () -> Void in
             if (stream.videoTracks.count > 0) {
                 self.remoteVideoTrack = stream.videoTracks[0]
                 self.remoteVideoTrack?.add(self.remoteVideoView)
-                print("remoteVideoView added")
             }
         })
     }
@@ -216,15 +263,19 @@ class ChatViewController: UIViewController, WebSocketDelegate,
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didGenerate candidate: RTCIceCandidate) {
         // Candidate(自分への接続先候補情報)が生成された際に呼ばれます
-        let jsonCandidate: JSON = [
-            "type": "candidate",
-            "ice": [
+        if candidate.sdpMid != nil {
+            let jsonCandidate: JSON = [
+                "type": "candidate",
+                "ice": [
                     "candidate": candidate.sdp,
                     "sdpMLineIndex": candidate.sdpMLineIndex,
                     "sdpMid": candidate.sdpMid!
                 ]
             ]
-        websocket.write(string: jsonCandidate.rawString()!)
+            websocket.write(string: jsonCandidate.rawString()!)
+        } else {
+            LOG("empty ice event")
+        }
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didOpen dataChannel: RTCDataChannel) {
@@ -245,6 +296,11 @@ class ChatViewController: UIViewController, WebSocketDelegate,
             height: height)
     }
     
+    
+    @IBAction func hangupButtonAction(_ sender: Any) {
+        hangUp()
+    }
+    
     func hangUp() {
         if peerConnection != nil {
             if peerConnection.iceConnectionState != RTCIceConnectionState.closed {
@@ -252,12 +308,12 @@ class ChatViewController: UIViewController, WebSocketDelegate,
                 let jsonClose: JSON = [
                     "type": "close"
                 ]
+                LOG("sending close message")
                 websocket.write(string: jsonClose.rawString()!)
             }
             if remoteVideoTrack != nil {
                 remoteVideoTrack?.remove(remoteVideoView)
             }
-            localVideoTrack = nil
             remoteVideoTrack = nil
             peerConnection = nil
         }

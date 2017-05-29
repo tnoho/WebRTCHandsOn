@@ -77,11 +77,24 @@
                                 <constraints>
                                     <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="Cl0-9F-wBX"/>
                                 </constraints>
+                                <state key="normal" title="HangUp">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="hangupButtonAction:" destination="Erv-cr-jKP" eventType="touchUpInside" id="Cud-pW-8Tk"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="IcZ-RY-DWr">
+                                <rect key="frame" x="20" y="40" width="100" height="30"/>
+                                <color key="backgroundColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="100" id="7Qw-bp-sa7"/>
+                                </constraints>
                                 <state key="normal" title="Close">
                                     <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 </state>
                                 <connections>
-                                    <action selector="closeButtonAction:" destination="Erv-cr-jKP" eventType="touchUpInside" id="Phu-3R-hkT"/>
+                                    <action selector="closeButtonAction:" destination="Erv-cr-jKP" eventType="touchUpInside" id="907-pF-PCH"/>
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="iOO-w5-mzR">
@@ -104,17 +117,18 @@
                             <constraint firstAttribute="trailing" secondItem="JCC-tZ-YXh" secondAttribute="trailing" constant="20" id="86m-h3-71l"/>
                             <constraint firstItem="23X-fE-Gi3" firstAttribute="top" secondItem="7b2-oR-LNo" secondAttribute="bottom" id="A4W-6V-pmj"/>
                             <constraint firstAttribute="trailing" secondItem="84r-yb-B9O" secondAttribute="trailing" constant="20" id="Pg3-Ez-h6D"/>
+                            <constraint firstItem="IcZ-RY-DWr" firstAttribute="leading" secondItem="U1b-sh-a1O" secondAttribute="leading" constant="20" id="Sq4-AZ-LlX"/>
                             <constraint firstItem="23X-fE-Gi3" firstAttribute="leading" secondItem="U1b-sh-a1O" secondAttribute="leading" id="aYA-Q8-eSm"/>
                             <constraint firstItem="xxE-si-1Pd" firstAttribute="top" secondItem="iOO-w5-mzR" secondAttribute="bottom" constant="20" id="ebW-jA-o6h"/>
                             <constraint firstItem="JCC-tZ-YXh" firstAttribute="top" secondItem="7b2-oR-LNo" secondAttribute="bottom" constant="20" id="fAH-iM-Nqn"/>
                             <constraint firstItem="xxE-si-1Pd" firstAttribute="top" secondItem="23X-fE-Gi3" secondAttribute="bottom" id="ids-gU-eui"/>
+                            <constraint firstItem="IcZ-RY-DWr" firstAttribute="top" secondItem="7b2-oR-LNo" secondAttribute="bottom" constant="20" id="jO3-lf-SKm"/>
                             <constraint firstItem="xxE-si-1Pd" firstAttribute="top" secondItem="84r-yb-B9O" secondAttribute="bottom" constant="20" id="klB-8N-O0G"/>
                             <constraint firstItem="iOO-w5-mzR" firstAttribute="leading" secondItem="U1b-sh-a1O" secondAttribute="leading" constant="20" id="tzc-st-LeK"/>
                         </constraints>
                     </view>
                     <connections>
                         <outlet property="cameraPreview" destination="JCC-tZ-YXh" id="Ujb-Z3-tnf"/>
-                        <outlet property="connectButton" destination="iOO-w5-mzR" id="ZAW-CW-dBN"/>
                         <outlet property="remoteVideoView" destination="23X-fE-Gi3" id="M2G-Hl-lRQ"/>
                     </connections>
                 </viewController>
