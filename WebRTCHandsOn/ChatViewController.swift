@@ -13,7 +13,6 @@ class ChatViewController: UIViewController {
 
     @IBOutlet weak var cameraPreview: RTCCameraPreviewView!
     @IBOutlet weak var remoteVideoView: RTCEAGLVideoView!
-    @IBOutlet weak var connectButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,6 +38,8 @@ class ChatViewController: UIViewController {
     }
     */
     
+    @IBAction func hangupButtonAction(_ sender: Any) {
+    }
     
     @IBAction func closeButtonAction(_ sender: Any) {
         _ = self.navigationController?.popToRootViewController(animated: true)
