@@ -12,7 +12,7 @@ import Starscream
 import SwiftyJSON
 
 class ChatViewController: UIViewController, WebSocketDelegate,
-                            RTCPeerConnectionDelegate, RTCEAGLVideoViewDelegate {
+                            RTCPeerConnectionDelegate {
     var websocket: WebSocket! = nil
     
     var peerConnectionFactory: RTCPeerConnectionFactory! = nil
@@ -28,7 +28,6 @@ class ChatViewController: UIViewController, WebSocketDelegate,
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        remoteVideoView.delegate = self
         // RTCPeerConnectionFactoryの初期化
         peerConnectionFactory = RTCPeerConnectionFactory()
         
@@ -118,32 +117,42 @@ class ChatViewController: UIViewController, WebSocketDelegate,
     }
     
     func makeOffer() {
+        // PeerConnectionを生成
         peerConnection = prepareNewConnection()
+        // Offerの設定 今回は映像も音声も受け取る
         let constraints = RTCMediaConstraints(mandatoryConstraints: [
             "OfferToReceiveAudio": "true",
             "OfferToReceiveVideo": "true"
             ], optionalConstraints: nil)
         let offerCompletion = { (offer: RTCSessionDescription?, error: Error?) in
+            // Offerの生成が完了した際の処理
             if error != nil { return }
             self.LOG("createOffer() succsess")
+            
             let setLocalDescCompletion = {(error: Error?) in
+                // setLocalDescCompletionが完了した際の処理
                 if error != nil { return }
                 self.LOG("setLocalDescription() succsess")
+                // 相手に送る
                 self.sendSDP(offer!)
             }
+            // 生成したOfferを自分のSDPとして設定
             self.peerConnection.setLocalDescription(offer!, completionHandler: setLocalDescCompletion)
         }
+        // Offerを生成
         self.peerConnection.offer(for: constraints, completionHandler: offerCompletion)
     }
     
     func sendSDP(_ desc: RTCSessionDescription) {
         LOG("---sending sdp ---")
         let jsonSdp: JSON = [
-            "sdp": desc.sdp,
-            "type": RTCSessionDescription.string(for: desc.type)
+            "sdp": desc.sdp, // SDP本体
+            "type": RTCSessionDescription.string(for: desc.type) // offer か answer か
         ]
+        // JSONを生成
         let message = jsonSdp.rawString()!
         LOG("sending SDP=" + message)
+        // 相手に送信
         websocket.write(string: message)
     }
     
@@ -152,6 +161,7 @@ class ChatViewController: UIViewController, WebSocketDelegate,
             LOG("peerConnection NOT exist!")
             return
         }
+        // 受け取ったSDPを相手のSDPとして設定
         self.peerConnection.setRemoteDescription(answer, completionHandler: {
             (error: Error?) in
             if error == nil {
@@ -172,13 +182,15 @@ class ChatViewController: UIViewController, WebSocketDelegate,
     
     func websocketDidReceiveMessage(socket: WebSocket, text: String) {
         LOG("message: \(text)")
+        // 受け取ったメッセージをJSONとしてパース
         let jsonMessage = JSON.parse(text)
         let type = jsonMessage["type"].stringValue
         switch (type) {
         case "answer":
+            // answerを受け取った時の処理
             LOG("Received answer ...")
             let answer = RTCSessionDescription(
-                type: RTCSessionDescription.type(for: jsonMessage["type"].stringValue),
+                type: RTCSessionDescription.type(for: type),
                 sdp: jsonMessage["sdp"].stringValue)
             setAnswer(answer)
         case "candidate":
@@ -205,8 +217,11 @@ class ChatViewController: UIViewController, WebSocketDelegate,
         // 映像/音声が追加された際に呼ばれます
         LOG("-- peer.onaddstream()")
         DispatchQueue.main.async(execute: { () -> Void in
+            // mainスレッドで実行
             if (stream.videoTracks.count > 0) {
+                // ビデオのトラックを取り出して
                 self.remoteVideoTrack = stream.videoTracks[0]
+                // remoteVideoViewに紐づける
                 self.remoteVideoTrack?.add(self.remoteVideoView)
             }
         })
@@ -279,17 +294,6 @@ class ChatViewController: UIViewController, WebSocketDelegate,
     func peerConnection(_ peerConnection: RTCPeerConnection, didRemove candidates: [RTCIceCandidate]) {
         // Candidateが削除された際に呼ばれます
     }
-    
-    func videoView(_ videoView: RTCEAGLVideoView, didChangeVideoSize size: CGSize) {
-        let width = self.view.frame.width
-        let height = self.view.frame.width * size.height / size.width
-        remoteVideoView.frame = CGRect(
-            x: 0,
-            y: (self.view.frame.height - height) / 2,
-            width: width,
-            height: height)
-    }
-    
     
     @IBAction func hangupButtonAction(_ sender: Any) {
         // HangUpボタンを押した時
