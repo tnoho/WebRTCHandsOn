@@ -294,6 +294,7 @@ class ChatViewController: UIViewController, WebSocketDelegate,
     func peerConnection(_ peerConnection: RTCPeerConnection, didGenerate candidate: RTCIceCandidate) {
         // Candidate(自分への接続先候補情報)が生成された際に呼ばれます
         if candidate.sdpMid != nil {
+            sendIceCandidate(candidate)
         } else {
             LOG("empty ice event")
         }
@@ -352,8 +353,8 @@ class ChatViewController: UIViewController, WebSocketDelegate,
             }
             remoteVideoTrack = nil
             peerConnection = nil
+            LOG("peerConnection is closed.")
         }
-        LOG("peerConnection is closed.")
     }
     
     @IBAction func closeButtonAction(_ sender: Any) {
