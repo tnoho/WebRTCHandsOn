@@ -98,6 +98,7 @@ class ChatViewController: UIViewController, WebSocketDelegate,
     }
   
     @IBAction func connectButtonAction(_ sender: Any) {
+        // Connectボタンを押した時
         if peerConnection == nil {
             peerConnection = prepareNewConnection()
         }
@@ -177,6 +178,7 @@ class ChatViewController: UIViewController, WebSocketDelegate,
     
     
     @IBAction func hangupButtonAction(_ sender: Any) {
+        //HangUpボタンを押した時
         hangUp()
     }
     
@@ -191,7 +193,7 @@ class ChatViewController: UIViewController, WebSocketDelegate,
     }
     
     @IBAction func closeButtonAction(_ sender: Any) {
-        // 切断ボタンを押した時
+        // Closeボタンを押した時
         hangUp()
         websocket.disconnect()
         _ = self.navigationController?.popToRootViewController(animated: true)
