@@ -53,7 +53,7 @@ class ChatViewController: UIViewController, WebSocketDelegate {
     }
     
     @IBAction func closeButtonAction(_ sender: Any) {
-        // 切断ボタンを押した時
+        // Closeボタンを押した時
         websocket.disconnect()
         _ = self.navigationController?.popToRootViewController(animated: true)
     }
