@@ -101,19 +101,19 @@ class ChatViewController: UIViewController, WebSocketDelegate, RTCPeerConnection
     }
 
     func websocketDidConnect(socket: WebSocket) {
-        LOG("websocketが接続されました")
+        LOG()
     }
     
     func websocketDidDisconnect(socket: WebSocket, error: NSError?) {
-        LOG("websocketが切断されました: \(String(describing: error?.localizedDescription))")
+        LOG("error: \(String(describing: error?.localizedDescription))")
     }
     
     func websocketDidReceiveMessage(socket: WebSocket, text: String) {
-        LOG("Messageを受信しました : \(text)")
+        LOG("message: \(text)")
     }
     
     func websocketDidReceiveData(socket: WebSocket, data: Data) {
-        LOG("Dataを受信しました : \(data.count)")
+        LOG("data.count: \(data.count)")
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange stateChanged: RTCSignalingState) {
