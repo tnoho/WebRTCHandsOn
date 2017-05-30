@@ -136,26 +136,6 @@ class ChatViewController: UIViewController, WebSocketDelegate,
         self.peerConnection.offer(for: constraints, completionHandler: offerCompletion)
     }
     
-    func makeAnswer() {
-        LOG("sending Answer. Creating remote session description...")
-        if peerConnection == nil {
-            LOG("peerConnection NOT exist!")
-            return
-        }
-        let constraints = RTCMediaConstraints(mandatoryConstraints: nil, optionalConstraints: nil)
-        let answerCompletion = { (answer: RTCSessionDescription?, error: Error?) in
-            if error != nil { return }
-            self.LOG("createAnswer() succsess")
-            let setLocalDescCompletion = {(error: Error?) in
-                if error != nil { return }
-                self.LOG("setLocalDescription() succsess")
-                self.sendSDP(answer!)
-            }
-            self.peerConnection.setLocalDescription(answer!, completionHandler: setLocalDescCompletion)
-        }
-        self.peerConnection.answer(for: constraints, completionHandler: answerCompletion)
-    }
-    
     func sendSDP(_ desc: RTCSessionDescription) {
         LOG("---sending sdp ---")
         let jsonSdp: JSON = [
@@ -165,21 +145,6 @@ class ChatViewController: UIViewController, WebSocketDelegate,
         let message = jsonSdp.rawString()!
         LOG("sending SDP=" + message)
         websocket.write(string: message)
-    }
-    
-    func setOffer(_ offer: RTCSessionDescription) {
-        if peerConnection != nil {
-            LOG("peerConnection alreay exist!")
-        }
-        peerConnection = prepareNewConnection()
-        self.peerConnection.setRemoteDescription(offer, completionHandler: {(error: Error?) in
-            if error == nil {
-                self.LOG("setRemoteDescription(offer) succsess")
-                self.makeAnswer()
-            } else {
-                self.LOG("setRemoteDescription(offer) ERROR: " + error.debugDescription)
-            }
-        })
     }
     
     func setAnswer(_ answer: RTCSessionDescription) {
@@ -210,12 +175,6 @@ class ChatViewController: UIViewController, WebSocketDelegate,
         let jsonMessage = JSON.parse(text)
         let type = jsonMessage["type"].stringValue
         switch (type) {
-        case "offer":
-            LOG("Received offer ...")
-            let offer = RTCSessionDescription(
-                type: RTCSessionDescription.type(for: jsonMessage["type"].stringValue),
-                sdp: jsonMessage["sdp"].stringValue)
-            setOffer(offer)
         case "answer":
             LOG("Received answer ...")
             let answer = RTCSessionDescription(
@@ -229,9 +188,6 @@ class ChatViewController: UIViewController, WebSocketDelegate,
                 sdpMLineIndex: jsonMessage["ice"]["sdpMLineIndex"].int32Value,
                 sdpMid: jsonMessage["ice"]["sdpMid"].stringValue)
             addIceCandidate(candidate)
-        case "close":
-            LOG("peer is closed ...")
-            hangUp()
         default:
             return
         }
@@ -344,11 +300,6 @@ class ChatViewController: UIViewController, WebSocketDelegate,
         if peerConnection != nil {
             if peerConnection.iceConnectionState != RTCIceConnectionState.closed {
                 peerConnection.close()
-                let jsonClose: JSON = [
-                    "type": "close"
-                ]
-                LOG("sending close message")
-                websocket.write(string: jsonClose.rawString()!)
             }
             if remoteVideoTrack != nil {
                 remoteVideoTrack?.remove(remoteVideoView)
