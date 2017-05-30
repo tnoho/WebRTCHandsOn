@@ -109,11 +109,11 @@ class ChatViewController: UIViewController, WebSocketDelegate,
     }
     
     func websocketDidConnect(socket: WebSocket) {
-        LOG("websocketが接続されました")
+        LOG()
     }
     
     func websocketDidDisconnect(socket: WebSocket, error: NSError?) {
-        LOG("websocketが切断されました: \(String(describing: error?.localizedDescription))")
+        LOG("error: \(String(describing: error?.localizedDescription))")
     }
     
     func makeOffer() {
@@ -172,7 +172,7 @@ class ChatViewController: UIViewController, WebSocketDelegate,
         }
         peerConnection = prepareNewConnection()
         self.peerConnection.setRemoteDescription(offer, completionHandler: {(error: Error?) in
-            if error != nil {
+            if error == nil {
                 self.LOG("setRemoteDescription(offer) succsess")
                 self.makeAnswer()
             } else {
@@ -188,7 +188,7 @@ class ChatViewController: UIViewController, WebSocketDelegate,
         }
         self.peerConnection.setRemoteDescription(answer, completionHandler: {
             (error: Error?) in
-            if error != nil {
+            if error == nil {
                 self.LOG("setRemoteDescription(answer) succsess")
             } else {
                 self.LOG("setRemoteDescription(answer) ERROR: " + error.debugDescription)
@@ -205,7 +205,7 @@ class ChatViewController: UIViewController, WebSocketDelegate,
     }
     
     func websocketDidReceiveMessage(socket: WebSocket, text: String) {
-        LOG("Messageを受信しました : \(text)")
+        LOG("message: \(text)")
         let jsonMessage = JSON.parse(text)
         let type = jsonMessage["type"].stringValue
         switch (type) {
@@ -237,7 +237,7 @@ class ChatViewController: UIViewController, WebSocketDelegate,
     }
     
     func websocketDidReceiveData(socket: WebSocket, data: Data) {
-        LOG("Dataを受信しました : \(data.count)")
+        LOG("data.count: \(data.count)")
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange stateChanged: RTCSignalingState) {
